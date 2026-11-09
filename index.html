@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WORK TYPE 16｜向いてる就職先診断</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:linear-gradient(135deg,#f4f6ff,#e8fff7);color:#182338;min-height:100vh;padding:22px}.wrap{max-width:760px;margin:0 auto}.card{background:#fff;border-radius:24px;padding:clamp(20px,5vw,42px);box-shadow:0 15px 50px #24345b18}.tag{display:inline-block;background:#eeeaff;color:#6553d9;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:700}h1{font-size:clamp(30px,6vw,48px);line-height:1.15;margin:18px 0}p{line-height:1.7;color:#647089}.btn{border:0;border-radius:14px;padding:15px 22px;background:#6258e8;color:white;font-weight:800;font-size:16px;cursor:pointer;width:100%;margin-top:18px}.btn.secondary{background:#edf0f8;color:#29334b}.progress{height:8px;background:#edf0f7;border-radius:20px;margin:20px 0;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#6258e8,#20c9a2);width:0;transition:.2s}.choice{display:block;text-align:left;width:100%;border:2px solid #e8ebf4;background:#fff;border-radius:15px;padding:17px;margin:10px 0;font-size:16px;cursor:pointer;color:#182338}.choice:hover{border-color:#6258e8;background:#f8f7ff}.small{font-size:13px;color:#8791a6}.result{font-size:clamp(26px,5vw,38px);font-weight:900;margin:12px 0}.pill{display:inline-block;padding:6px 10px;border-radius:20px;background:#e8faf4;color:#087b61;font-weight:700;margin:4px}.hide{display:none}
+</style></head><body><main class="wrap"><section class="card" id="start"><span class="tag">WORK TYPE 16</span><h1>あなたに向いてる<br>就職先診断</h1><p>簡単な質問に答えるだけで、あなたの仕事タイプと相性のよい職種・働き方がわかる！<br>直感で選んでね。所要時間は約2分。</p><p class="small">※診断結果は自己理解のヒントです。職業選択を決めつけるものではありません。</p><button class="btn" id="startBtn">診断スタート →</button></section>
+<section class="card hide" id="quiz"><div class="small" id="count"></div><div class="progress"><div class="bar" id="bar"></div></div><h2 id="question"></h2><div id="answers"></div><button class="btn secondary" id="back">← 前の質問</button></section>
+<section class="card hide" id="result"><span class="tag">あなたの診断結果</span><div class="result" id="type"></div><h2 id="name"></h2><p id="desc"></p><h3>向いている職種の例</h3><div id="jobs"></div><h3>あなたの強み</h3><p id="strength"></p><h3>就活アドバイス</h3><p id="advice"></p><button class="btn" id="again">もう一度診断する</button></section></main>
+<script>
+const qs=[
+["チームで作業するときは？",["みんなと相談しながら進めたい","自分のペースで集中したい"],0],
+["仕事の進め方は？",["計画を立てて順番に進める","状況に合わせて柔軟に進める"],1],
+["判断するとき重視するのは？",["データや論理、合理性","人の気持ちや納得感"],2],
+["新しいアイデアについては？",["現実的で実現できる案が好き","可能性を広げる発想が好き"],3],
+["初対面の人と話すのは？",["わりと得意・楽しい","少し緊張する・聞き役が多い"],0],
+["締切や予定については？",["早めに準備しておきたい","直前の集中力で仕上げることも多い"],1],
+["意見が対立したら？",["筋が通っているかを考える","相手がどう感じるかを考える"],2],
+["仕事でワクワクするのは？",["目の前の課題を解決すること","新しい仕組みや未来を考えること"],3],
+["職場に求めるものは？",["活気があり人と関われる環境","静かで落ち着いて取り組める環境"],0],
+["突然の変更があったら？",["少し困るので整理して対応したい","面白そう！すぐ切り替えられる"],1],
+["褒められてうれしいのは？",["成果や実力を評価されたとき","気配りや支援を評価されたとき"],2],
+["得意なのは？",["細部を正確に仕上げる","全体像や新しい可能性を見つける"],3]
+];
+const dims=["EI","JP","TF","SN"], scores=[0,0,0,0];let idx=0;
+const types={
+"ESTJ":["リーダー実行タイプ","組織を動かし、目標に向かって着実に進める実行派。","営業・店長・施工管理・総務・生産管理","責任感、段取り力、決断力","成果や役割が明確な職場を探そう。"],
+"ESTP":["チャレンジ行動タイプ","行動力と柔軟さでチャンスをつかむ現場派。","法人営業・販売・イベント運営・起業","行動力、対応力、交渉力","変化が多く、成果が見える仕事が合いそう。"],
+"ESFJ":["人を支える調整タイプ","周囲をよく見て、人と協力しながら成果を出す。","接客・人事・医療事務・福祉・教育","協調性、気配り、調整力","人との関わりやチームの雰囲気を重視しよう。"],
+"ESFP":["場を明るくする体験タイプ","人との交流を楽しみ、場を盛り上げるムードメーカー。","観光・接客・広報・美容・販売","親しみやすさ、表現力、柔軟性","人と接する機会が多い職場をチェック。"],
+"ENTJ":["戦略リーダータイプ","目標を描き、周囲を巻き込みながら成果を目指す。","企画・経営企画・営業管理・コンサル","戦略性、推進力、判断力","裁量や成長機会のある仕事を探そう。"],
+"ENTP":["アイデア開拓タイプ","新しい可能性を見つけ、課題を面白く変える発想派。","企画・マーケティング・新規事業・広報","発想力、好奇心、問題解決力","変化やアイデアを歓迎する環境が向いていそう。"],
+"ENFJ":["人を伸ばすサポートタイプ","人の可能性を引き出し、チームを前向きにする。","人事・教育・営業・キャリア支援","共感力、育成力、リーダーシップ","誰かの成長に関われる仕事を見てみよう。"],
+"ENFP":["ひらめき共感タイプ","好奇心と人への関心で、新しい価値を生み出す。","広報・企画・採用・広告・イベント","創造力、共感力、熱意","自由度があり、人とアイデアに関われる職場が◎。"],
+"ISTJ":["堅実プロフェッショナルタイプ","正確さと責任感で、仕事を安定して支える。","経理・品質管理・公務員・事務・技術職","正確性、継続力、誠実さ","ルールや専門性を大切にできる職場を選ぼう。"],
+"ISTP":["技術探究タイプ","冷静に仕組みを理解し、実践的に問題を解決する。","機械・ITエンジニア・整備・品質技術","分析力、技術力、冷静さ","専門技術を磨ける環境がおすすめ。"],
+"ISFJ":["丁寧な支援タイプ","細やかな気配りで、人や組織を支える。","医療・福祉・一般事務・図書館・総務","丁寧さ、責任感、サポート力","安心感や人の役に立つ実感を大切に。"],
+"ISFP":["感性クリエイタータイプ","自分の感性を活かし、丁寧に価値を形にする。","デザイン・制作・美容・調理・ものづくり","感性、観察力、柔軟性","自分らしさや仕事の質を尊重する職場を。"],
+"INTJ":["未来設計タイプ","長期的な視点で考え、仕組みや戦略を設計する。","研究・IT・企画・データ分析・設計","分析力、計画力、独立心","深く考え、専門性を発揮できる仕事を探そう。"],
+"INTP":["論理研究タイプ","疑問を掘り下げ、理論や仕組みを理解する探究派。","研究・プログラマー・データ分析・技術開発","論理性、探究心、独創性","集中できる時間と知的な課題がある職場が◎。"],
+"INFJ":["理念サポートタイプ","人や社会の課題を見つめ、意味のある変化を目指す。","福祉・教育・人事・編集・相談支援","洞察力、共感力、信念","仕事の意義や価値観との一致を重視しよう。"],
+"INFP":["価値観クリエイタータイプ","自分の価値観を大切にし、理想を形にする。","ライター・デザイン・教育・福祉・企画","想像力、共感性、誠実さ","理念や自分の興味とつながる仕事を探そう。"]
+};
+function show(id){["start","quiz","result"].forEach(x=>document.getElementById(x).classList.toggle("hide",x!==id))}
+function start(){idx=0;scores.fill(0);show("quiz");render()}
+function render(){document.getElementById("count").textContent="QUESTION "+(idx+1)+" / "+qs.length;document.getElementById("bar").style.width=((idx+1)/qs.length*100)+"%";document.getElementById("question").textContent=qs[idx][0];let a=document.getElementById("answers");a.innerHTML="";qs[idx][1].forEach((txt,n)=>{let b=document.createElement("button");b.className="choice";b.textContent=txt;b.onclick=()=>{scores[qs[idx][2]]+=n===0?1:-1;idx++;idx===qs.length?finish():render()};a.appendChild(b)});document.getElementById("back").style.visibility=idx===0?"hidden":"visible"}
+function finish(){let code=dims.map((d,i)=>scores[i]>=0?d[0]:d[1]).join("");let t=types[code];document.getElementById("type").textContent=code;document.getElementById("name").textContent=t[0];document.getElementById("desc").textContent=t[1];document.getElementById("jobs").innerHTML=t[2].split("・").map(x=>'<span class="pill">'+x+'</span>').join("");document.getElementById("strength").textContent=t[3];document.getElementById("advice").textContent=t[4];show("result")}
+document.getElementById("startBtn").addEventListener("click",start);document.getElementById("back").addEventListener("click",()=>{if(idx>0){idx--;scores[qs[idx][2]]-=0;render()}});document.getElementById("again").addEventListener("click",()=>show("start"));
+</script></body></html>
